@@ -9,39 +9,21 @@
   * Run  the following commands, which will automatically read the exposure times of images under `$INDIR` and create `exposure_times.csv`
 
     ```bash
-    cd code
     python3 read_exposure.py $INDIR
     # E.g., 
-    # python3 read_exposure.py ../data/team26_2
+    # python3 read_exposure.py ./data/team26_2
     ```
 ### Run the code
 * Command
     ```bash
-    cd code
     python3 main.py --indir $INDIR --outdir $OUTDIR 
     # E.g.,
-    # python3 main.py --indir ../data/team26_2 --outdir ../data
+    # python3 main.py --indir ./data/team26_2 --outdir ./data
     ```
-* Folder Structure
-  ```
-  /
-    ├──/data
-    |    ├──team26_x (original data)
-    |    ├──testcase_x (original data)
-    |    ├──recovered_hdr.hdr
-    |    └──tone-mapped.png
-    └──/code
-      ├──main.py
-      └──/modules
-            ├──__init__.py
-            ├──align.py
-            ├──hdr.py
-            ├──tonemapping.py
-            └──utils.py
-  ```
+ 
 ## 1. Image Alignment
 * MTB Algorithm
-  |  | w/o align | w/ align|
+  |  | w/o alignment | w/ alignment (d=10)|
   |--|-----------|---------|
   |team26_1|![w/o MTB](./data/assets/local_without_mtb.png)|![w MTB](./data/assets/local_with_mtb.png)
 

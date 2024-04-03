@@ -9,9 +9,9 @@ from modules.hdr import Debevec
 
 
 parser = argparse.ArgumentParser('HDR Imaging')
-parser.add_argument('--indir', default='../data/team26_3',
+parser.add_argument('--indir', default='./data/team26_3',
                     type=str, help='Input directory containing images and exposure_times.csv')
-parser.add_argument('--outdir', default='../data/',
+parser.add_argument('--outdir', default='./data/',
                     type=str, help='Output directory.')
 parser.add_argument('-d', default=6, type=int,
                     help='Depth for image alignment.')
