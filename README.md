@@ -1,10 +1,10 @@
 # High Dynamic Range Imaging
 * Given a series of photographs for a scene under different exposures, output an HDR image and, optionally, the response curve of the camera.
-* With the responsive function, we can construct a radinace map and output as a Radiance RGBE image (.hdr)
+* With the responsive function, we can reconstruct the radinace map and output it as a Radiance RGBE image (.hdr)
 * Finally, tone map the radiance map (HDR) to a LDR image.
 
 ## Usage
-### Prepare your data before starting
+### Prepare your data before running
   * Put your images of different exposure times under `$INDIR`
   * Run  the following commands, which will automatically read the exposure times of images under `$INDIR` and create `exposure_times.csv`
 
@@ -14,7 +14,7 @@
     # E.g., 
     # python3 read_exposure.py ../data/team26_2
     ```
-### RUN
+### Run the code
 * Command
     ```bash
     cd code
@@ -61,23 +61,18 @@
 * Global and Local Operator (dodging and burning)
   * Reference from [Photographic Tone Reproduction for Digital Images](https://dl.acm.org/doi/10.1145/566654.566575)
 * Global Method
-    $$
-    \overline L_w=e^{[\frac1N \Sigma_{x,y}log(\delta + L_w(x, y))]}$$
-    $$
-    L_m(x, y) = \frac{\alpha}{\overline L_w}L_w(x, y)$$
-    $$
-    \rightarrow L_d(x, y) = \frac{L_m(x, y)(1+\frac{L_m(x, y)}{{L_{white}(x, y)}^2})}{1+L_m(x, y)}
-    $$
+  $$\overline L_w=e^{[\frac1N \Sigma_{x,y}log(\delta + L_w(x, y))]}$$
+  $$L_m(x, y) = \frac{\alpha}{\overline L_w}L_w(x, y)$$
+  $$\rightarrow L_d(x, y) = \frac{L_m(x, y)(1+\frac{L_m(x, y)}{{L_{white}(x, y)}^2})}{1+L_m(x, y)}$$
 * Local Method
-  $$
-  V_i^{blur}(x, y, s) = L_m(x, y) \otimes G_s(x, y, s) $$
-  $$
-  V_s(x, y, s) = \frac{V_1^{blur}(x, y, s) - V_{2}^{blur}(x, y, s)}{2^{\phi} \frac{\alpha}{s^2}+V_1^{blur}},  s_{max} \ni |V_{s_{max}}(x, y) < \epsilon|
-  $$
-  $$
-  \rightarrow L_d(x, y) = \frac{L_m(x, y)}{1+V^{blur}_1(x, y, s_{max}(x, y))}$$
-* Comparisons of global and local methods
+  $$V_i^{blur}(x, y, s) = L_m(x, y) \otimes G_s(x, y, s)$$
+  $$V_s(x, y, s) = \frac{V_1^{blur}(x, y, s) - V_{2}^{blur}(x, y, s)}{2^{\phi} \frac{\alpha}{s^2}+V_1^{blur}},  s_{max} \ni |V_{s_{max}}(x, y) < \epsilon|$$
+  $$\rightarrow L_d(x, y)=\frac{L_m(x, y)}{1+V_1^{blur} \left( x, y, s_{max}(x, y) \right)}$$
+  
+
+- Comparisons of global and local methods
+
   |  | Global | Local |
   |--|--------|-------|
-  |testcase_1|<img src='./data/assets/testcase_1_global.png' width=400></img>|<img src='./data/assets/testcase_1_local.png' width=400></img>|
-  |testcase_2|<img src='./data/assets/testcase_2_global.png' width=400></img>|<img src='./data/assets/testcase_2_local.png' width=400></img>|
+  |testcase_1|![testcase_1_global](./data/assets/testcase_1_global.png)|![testcase_1_local](./data/assets/testcase_1_local.png)|
+  |testcase_2|![testcase_2_global](./data/assets/testcase_2_global.png)|![testcase_2_local](./data/assets/testcase_2_local.png)|
