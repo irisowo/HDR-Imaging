@@ -1,47 +1,49 @@
 # High Dynamic Range Imaging
 * Given a series of photographs for a scene under different exposures, output an HDR image and, optionally, the response curve of the camera.
 * With the responsive function, we can reconstruct the radinace map and output it as a Radiance RGBE image (.hdr)
-* Finally, tone map the radiance map (HDR) to a LDR image.
-
+* Finally, tone map the radiance map (HDR) to a low dynamic range (LDR) image.
 ## Usage
-### Prepare your data before running
-  * Put your images of different exposure times under `$INDIR`
-  * Run  the following commands, which will automatically read the exposure times of images under `$INDIR` and create `exposure_times.csv`
+### Data Preparation (Optional)
+  * Place your images of different exposure times under `$INDIR`
+  * Run the following command, which will automatically read the exposure times of images under `$INDIR` and create `exposure_times.csv`
 
     ```bash
     python3 read_exposure.py $INDIR
     # E.g., 
     # python3 read_exposure.py ./data/team26_2
     ```
-### Run the code
+### Running the Code
 * Command
     ```bash
-    python3 main.py --indir $INDIR --outdir $OUTDIR 
+    python main.py [--indir $INDIR] [--outdir $OUTDIR] [-d $DEPTH] 
+    [-w $WEIGHTING_FUNCTION] [--lamb $LAMBDA] [--alpha $ALPHA] 
+    [--gamma $GAMMA] [--tm $TONEMAPPING_METHOD] 
+ 
     # E.g.,
     # python3 main.py --indir ./data/team26_2 --outdir ./data
     ```
  
-## 1. Image Alignment
-* MTB Algorithm
+## 1. Image Alignment (MTB Algorithm)
+* Align all images before further processing.
   |  | w/o alignment | w/ alignment (d=10)|
   |--|-----------|---------|
   |team26_1|![w/o MTB](./data/assets/local_without_mtb.png)|![w MTB](./data/assets/local_with_mtb.png)
 
-## 2. HDR Reconstruction
-* Pual Debevec's Method
-  * Reference from [Recovering high dynamic range radiance maps from photographs](https://dl.acm.org/doi/10.1145/258734.258884)
+## 2. HDR Reconstruction (Debevec's Method):
+* Reference : [Recovering high dynamic range radiance maps from photographs](https://dl.acm.org/doi/10.1145/258734.258884)
+* Combine the aligned images to recover the scene's radiance map.
   * By rewriting the objective $O$ into the form of $Ax=b$, we can solve $x = [g(0) \dots g(255) \ lnE_1 \dots lnE_n]^T$, getting $g$ such that $g(Z_{ij} = ln(X_{ij}))$
   $$O = \sum_{i=1}^{N} \sum_{j=1}^{P} {w(Z_{ij}) [g(Z_{ij}) - ln E_i - ln \Delta t_j]}^2 + \lambda \sum_{z=Zmin+1}^{Zmax-1} [w(z)g''(z)]^2
   $$ 
 * Recover HDR Radiance map by Camera Response Function
   * With $g$, we can compute the radiance of each pixel $i$ based on
-  $$ 
-    E_i = e^{\frac{\sum_{j=1}^{P}w(Z_{ij})(g(Z_{ij}) - ln \Delta t_j)}{\sum_{j=1}^{P}w(Z_{ij})}}
+  $$E_i = e^{\frac{{\Sigma_{j=1}^{P}{w(Z_{ij})(g(Z_{ij}) - ln \Delta t_j)}}}{\Sigma_{j=1}^{P}w(Z_{ij})}}
   $$
 
 ## 3. Tone Mapping
-* Global and Local Operator (dodging and burning)
-  * Reference from [Photographic Tone Reproduction for Digital Images](https://dl.acm.org/doi/10.1145/566654.566575)
+* Reference : [Photographic Tone Reproduction for Digital Images](https://dl.acm.org/doi/10.1145/566654.566575)
+* Global and Local operators (dodging and burning) are implemented to converts the HDR image into a LDR image suitable for displaying on standard monitors.
+
 * Global Method
   $$\overline L_w=e^{[\frac1N \Sigma_{x,y}log(\delta + L_w(x, y))]}$$
   $$L_m(x, y) = \frac{\alpha}{\overline L_w}L_w(x, y)$$

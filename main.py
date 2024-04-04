@@ -26,7 +26,6 @@ parser.add_argument('--gamma', default=1/1.1, type=float,
                     help='Gamma for gamma correction.')
 parser.add_argument('--tm', default='local',
                     choices=['global', 'local'], type=str, help='Tone mapping method.')
-parser.add_argument('--seed', default=8763, type=int, help='Random seed.')
 
 
 class HDR_Solution():

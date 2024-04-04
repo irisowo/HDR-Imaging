@@ -11,33 +11,29 @@ class ToneMapping():
         self.tm_method = tm_method
         self.delta = 1e-4
 
-    def gamma_correction(self, img):
+    def gamma_correction(self, img, gamma=1.0):
         return np.clip(np.power(img, self.gamma) * 255.0, 0, 255).astype(np.uint8)
 
     def modify_lightness_saturation(self, img, lightness=-10, saturation=20):
-        '''
-        param lightness: +/- percentage of lightness
-        param saturation: +/- percentage of saturation
-        '''
-        # normalize to 0~1 and convert to float32
-        fImg = img.astype(np.float32) / 255.0
-        hlsImg = cv2.cvtColor(fImg, cv2.COLOR_BGR2HLS)
+        # BGR > HLS after normalizing img to 0~1 in float32
+        hlsImg = cv2.cvtColor(img.astype(np.float32)/255.0, cv2.COLOR_BGR2HLS)
 
         # lightness
-        hlsImg[:, :, 1] = (1 + lightness / 100.0) * hlsImg[:, :, 1]
-        hlsImg[:, :, 1][hlsImg[:, :, 1] > 1] = 1
+        hlsImg[:, :, 1] = np.clip(
+            hlsImg[:, :, 1] * (1 + lightness / 100.0), 0, 1)
         # saturation
-        hlsImg[:, :, 2] = (1 + saturation / 100.0) * hlsImg[:, :, 2]
-        hlsImg[:, :, 2][hlsImg[:, :, 2] > 1] = 1
+        hlsImg[:, :, 2] = np.clip(
+            hlsImg[:, :, 2] * (1 + saturation / 100.0), 0, 1)
 
         # HLS -> BGR
-        result_img = cv2.cvtColor(hlsImg, cv2.COLOR_HLS2BGR)
-        result_img = ((result_img * 255).astype(np.uint8))
+        result_img = (
+            (cv2.cvtColor(hlsImg, cv2.COLOR_HLS2BGR) * 255).astype(np.uint8))
         return result_img
 
     def global_operator(self, Lw):
         Lw_mu = np.exp(np.mean(np.log(self.delta + Lw)))
         Lm = (self.alpha / Lw_mu) * Lw
+
         # Lwhite is the smallest luminance to be mapped to 1
         Lwhite = np.max(Lm)
         Ld = (Lm * (1 + (Lm / (Lwhite ** 2)))) / (1 + Lm)
@@ -56,17 +52,13 @@ class ToneMapping():
         num_s = int((srange+1)//2)
 
         blurs = np.zeros((h, w, num_s))
-        s_indices = np.zeros((h, w), dtype=int)
+        s_indices = np.full((h, w), num_s-1, dtype=int)
         for i, s in enumerate(range(1, srange+1, 2)):
             V1 = cv2.GaussianBlur(im, (s, s), alpha1)
             V2 = cv2.GaussianBlur(im, (s, s), alpha2)
             Vs = np.abs((V1 - V2) / (a / (s ** 2) + V1))
-            # 0 if Vs > eplison
             s_indices[np.where(Vs < epsilon)] = i
             blurs[:, :, i] = V1
-
-        # deal with the case that we can't found s such that |Vs| < epsilon
-        s_indices[np.where(s_indices == 0)] = num_s - 1
 
         h_indices, w_indices = np.indices((h, w))
         blur_smax = blurs[h_indices, w_indices, s_indices]
@@ -94,6 +86,6 @@ class ToneMapping():
         # Tone mapping : HDR --> LDR
         ldr = switcher.get(self.tm_method)(radiance_bgr)
 
-        # [Postprocess] Adjust lightness and saturation
+        # Finetune lightness and saturation
         ldr = self.modify_lightness_saturation(ldr, 5, 20)
         return ldr

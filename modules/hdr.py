@@ -91,9 +91,8 @@ class Debevec():
             for j, img in enumerate(images):
                 zj = img[:, :, c].ravel()
                 w_zj = W[zj].reshape(h, w)
-                w_lnE = w_zj * (g[zj] - lnt[j]).reshape(h, w)
                 sum_w += w_zj
-                sum_w_lnE += w_lnE
+                sum_w_lnE += w_zj * (g[zj] - lnt[j]).reshape(h, w)
 
             lnE_bgr[:, :, c] = sum_w_lnE / sum_w
 
