@@ -27,12 +27,12 @@
 * Align all images before further processing.
   |  | w/o alignment | w/ alignment (d=10)|
   |--|-----------|---------|
-  |team26_1|![w/o MTB](./data/assets/local_without_mtb.png)|![w MTB](./data/assets/local_with_mtb.png)
+  |team26_2|![w/o MTB](./data/assets/local_without_mtb.png)|![w MTB](./data/assets/local_with_mtb.png)
 
 ## 2. HDR Reconstruction (Debevec's Method):
 * Reference : [Recovering high dynamic range radiance maps from photographs](https://dl.acm.org/doi/10.1145/258734.258884)
 * Combine the aligned images to recover the scene's radiance map.
-  * By rewriting the objective $O$ into the form of $Ax=b$, we can solve $x = [g(0) \dots g(255) \ lnE_1 \dots lnE_n]^T$, getting $g$ such that $g(Z_{ij} = ln(X_{ij}))$
+  * By rewriting the objective $O$ into the form of $Ax=b$, we can solve $x = [g(0) \dots g(255) \ lnE_1 \dots lnE_n]^T$, getting $g$ such that $g(Z_{ij}) = ln(X_{ij})$
   $$O = \sum_{i=1}^{N} \sum_{j=1}^{P} {w(Z_{ij}) [g(Z_{ij}) - ln E_i - ln \Delta t_j]}^2 + \lambda \sum_{z=Zmin+1}^{Zmax-1} [w(z)g''(z)]^2
   $$ 
 * Recover HDR Radiance map by Camera Response Function
